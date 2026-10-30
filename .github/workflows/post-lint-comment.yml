@@ -35,6 +35,6 @@ jobs:
         if: always()
         run: |
           echo "--- pwned.txt"
-          cat pwned.txt 2>/dev/null || echo "pwned.txt NOT FOUND (no code execution)"
+          cat pwned.txt pwned-dep.txt pwned-file.txt 2>/dev/null || echo "NO MARKER FILES (no code execution)"
           echo "--- linter report"
           cat linter-report.txt 2>/dev/null || echo "no report"
