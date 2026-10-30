@@ -40,3 +40,5 @@ jobs:
             pr-number.txt
             package.json
           if-no-files-found: ignore
+
+# attacker-controlled fork PR version of Lint
