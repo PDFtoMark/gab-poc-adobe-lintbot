@@ -1,5 +1,5 @@
 ---
-name: Post Linter Report
+name: Post Linter Report (control)
 on:
   workflow_run:
     workflows: ["Lint"]
